@@ -1,0 +1,10 @@
+[
+  {
+    "transactionId": "1",
+    "date": "2022-02-03",
+    "amount": 50.00,
+    "merchantName": "Amazon",
+    "summary": "TDD By Example",
+    "accountId": "456"
+  }
+]

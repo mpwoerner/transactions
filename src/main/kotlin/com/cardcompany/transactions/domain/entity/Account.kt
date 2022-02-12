@@ -1,4 +1,4 @@
-package com.cardcompany.transactions.domain
+package com.cardcompany.transactions.domain.entity
 
 import javax.persistence.*
 
@@ -7,7 +7,7 @@ class Account(
     @Id
     @Column(name = "ACCOUNT_ID")
     val accountId: Long = 0,
-    val memberName: String? = null,
+    val memberName: String,
     @OneToMany(mappedBy = "account", cascade = [CascadeType.ALL])
-    var transactions: Set<Transaction>? = null
+    var transactions: Set<Transaction> = emptySet()
 )

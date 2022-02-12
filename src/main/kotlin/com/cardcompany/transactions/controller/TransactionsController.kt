@@ -1,6 +1,6 @@
 package com.cardcompany.transactions.controller
 
-import com.cardcompany.transactions.domain.TransactionResponse
+import com.cardcompany.transactions.domain.response.TransactionResponse
 import com.cardcompany.transactions.service.TransactionsService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping

@@ -1,6 +1,6 @@
 package com.cardcompany.transactions.repository
 
-import com.cardcompany.transactions.domain.Transaction
+import com.cardcompany.transactions.domain.entity.Transaction
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 

@@ -1,4 +1,4 @@
-package com.cardcompany.transactions.domain
+package com.cardcompany.transactions.domain.entity
 
 import javax.persistence.*
 
@@ -9,10 +9,10 @@ class Transaction(
     val transactionId: Long = 0,
     val date: Long = 0,
     val amount: Double = 0.0,
-    val merchantName: String? = null,
-    val summary: String? = null,
+    val merchantName: String,
+    val summary: String,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ACCOUNT_ID")
-    val account: Account? = null
+    val account: Account
 )
