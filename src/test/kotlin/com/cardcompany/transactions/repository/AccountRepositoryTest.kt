@@ -2,7 +2,9 @@ package com.cardcompany.transactions.repository
 
 import com.cardcompany.transactions.utils.TestAccounts.initializeDb
 import com.cardcompany.transactions.utils.TestAccounts.teardownDb
+import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldNotBe
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -12,8 +14,7 @@ import org.springframework.test.context.ActiveProfiles
 
 @ActiveProfiles("test")
 @DataJpaTest
-class TransactionRepositoryTest(
-    @Autowired private val transactionRepository: TransactionRepository,
+class AccountRepositoryTest(
     @Autowired private val accountRepository: AccountRepository
 ) {
     @BeforeEach
@@ -27,9 +28,15 @@ class TransactionRepositoryTest(
     }
 
     @Test
-    fun `findAllByAccount_AccountId returns list of transactions for given account`() {
-        val actualResponse = transactionRepository.findAllByAccount_AccountId(456L)
-        actualResponse.size shouldBeEqualTo 1
-        actualResponse[0].account.accountId shouldBeEqualTo 456L
+    fun `findByAccountId returns account for given id`() {
+        val account = accountRepository.findByAccountId(789L)
+
+        account shouldNotBe null
+        account?.transactions?.size shouldBeEqualTo 3
+    }
+
+    @Test
+    fun `findByAccountId returns null when account with given id does not exist`() {
+        accountRepository.findByAccountId(555L) shouldBe null
     }
 }

@@ -1,9 +1,10 @@
 package com.cardcompany.transactions.integrationTest
 
-import com.cardcompany.transactions.domain.entity.Account
 import com.cardcompany.transactions.repository.AccountRepository
-import com.cardcompany.transactions.utils.aTransactionWith
+import com.cardcompany.transactions.utils.TestAccounts.initializeDb
+import com.cardcompany.transactions.utils.TestAccounts.teardownDb
 import com.cardcompany.transactions.utils.readFile
+import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -13,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
-import java.time.LocalDate
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -23,29 +23,15 @@ class TransactionsIntegrationTest(
     @Autowired private val accountRepository: AccountRepository
 ) {
 
-    private final val ACCOUNT_WITH_NO_TRANSACTIONS = Account(
-        accountId = 123L,
-        memberName = "Tony Soprano"
-    )
-
-    private final val ACCOUNT_WITH_TRANSACTIONS = Account(
-        accountId = 456L,
-        memberName = "Paulie Walnuts",
-    ).apply {
-        this.transactions = setOf(
-            aTransactionWith(this, LocalDate.of(2022, 2, 3).toEpochDay(), 1L)
-        )
-    }
 
     @BeforeEach
     fun setUp() {
-        accountRepository.save(ACCOUNT_WITH_NO_TRANSACTIONS)
-        accountRepository.save(ACCOUNT_WITH_TRANSACTIONS)
+        initializeDb(accountRepository)
     }
 
     @AfterEach
     fun tearDown() {
-        accountRepository.deleteAll()
+        teardownDb(accountRepository)
     }
 
     /**
@@ -80,6 +66,29 @@ class TransactionsIntegrationTest(
             .andExpect {
                 status { isOk() }
                 content { json(expectedResponse, strict = false) }
+            }
+    }
+
+    /**
+     * Scenario 3: Account does not exist in database
+     * GIVEN a card member account id that does not exist
+     * WHEN I request a list of transactions for that account
+     * THEN I will receive a not found response
+     * AND I will see a detailed not found error message
+     */
+    @Test
+    fun `returns not found error response when account does not exist`() {
+        mockMvc.get("/accounts/555/transactions")
+            .andDo { print() }
+            .andExpect {
+                status { isNotFound() }
+                content {
+                    jsonPath(
+                        "$.error.message",
+                        `is`("The card member account with the id of 555 was not found.")
+                    )
+                }
+                content { jsonPath("$.error.type", `is`("AccountNotFoundException")) }
             }
     }
 }
