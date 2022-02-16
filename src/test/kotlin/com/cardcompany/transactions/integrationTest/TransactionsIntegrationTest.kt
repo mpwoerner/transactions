@@ -91,4 +91,22 @@ class TransactionsIntegrationTest(
                 content { jsonPath("$.error.type", `is`("AccountNotFoundException")) }
             }
     }
+
+    /**
+     * Scenario 4: Retrieve transactions for an account after a given a date
+     * GIVEN a card member account with transactions
+     * WHEN I request a list of transactions after the given date
+     * THEN I will receive a success response
+     * AND I will see a list of transactions that occurred on and after the given date
+     */
+    @Test
+    fun `returns filtered transactions when fromDate query paramter included in request`() {
+        val expectedResponse = readFile("account-with-filtered-transactions.json")
+        mockMvc.get("/accounts/789/transactions?fromDate=2022-02-02")
+            .andDo { print() }
+            .andExpect {
+                status { isOk() }
+                content { json(expectedResponse, strict = false) }
+            }
+    }
 }

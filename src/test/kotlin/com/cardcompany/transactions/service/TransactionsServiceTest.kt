@@ -1,10 +1,12 @@
 package com.cardcompany.transactions.service
 
 import com.cardcompany.transactions.domain.entity.Account
-import com.cardcompany.transactions.domain.entity.Transaction
 import com.cardcompany.transactions.domain.exception.AccountNotFoundException
 import com.cardcompany.transactions.repository.AccountRepository
 import com.cardcompany.transactions.repository.TransactionRepository
+import com.cardcompany.transactions.utils.TestTransactions.transaction1
+import com.cardcompany.transactions.utils.TestTransactions.transaction2
+import com.cardcompany.transactions.utils.TestTransactions.transaction3
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -15,7 +17,6 @@ import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldThrow
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class TransactionsServiceTest {
@@ -29,12 +30,13 @@ class TransactionsServiceTest {
     private lateinit var transactionsService: TransactionsService
 
     @Test
-    fun `getTransactions() calls transaction and account repositories`() {
+    fun `getTransactions() calls transaction and account repositories and returns empty list`() {
         every { mockAccountRepository.findByAccountId(any()) } returns Account(memberName = "Tony Soprano")
         every { mockTransactionRepository.findAllByAccount_AccountId(any()) } returns emptyList()
 
-        transactionsService.getTransactions(123L)
+        val transactionResponseList = transactionsService.getTransactions(123L, "2022-02-01")
 
+        transactionResponseList.size shouldBeEqualTo 0
         verify { mockAccountRepository.findByAccountId(123L) }
         verify { mockTransactionRepository.findAllByAccount_AccountId(123L) }
     }
@@ -42,21 +44,9 @@ class TransactionsServiceTest {
     @Test
     fun `getTransactions() returns list of transactionResponse`() {
         every { mockAccountRepository.findByAccountId(any()) } returns Account(memberName = "Tony Soprano")
-        every { mockTransactionRepository.findAllByAccount_AccountId(any()) } returns listOf(
-            Transaction(
-                transactionId = 1,
-                date = LocalDate.of(2022, 2, 1).toEpochDay(),
-                amount = 50.00,
-                merchantName = "Amazon",
-                summary = "XP Explained",
-                account = Account(
-                    accountId = 456,
-                    memberName = "Paulie Walnuts"
-                )
-            )
-        )
+        every { mockTransactionRepository.findAllByAccount_AccountId(any()) } returns listOf(transaction1)
 
-        val transactionResponseList = transactionsService.getTransactions(123L)
+        val transactionResponseList = transactionsService.getTransactions(123L, null)
 
         transactionResponseList.size shouldBeEqualTo 1
         transactionResponseList[0].accountId shouldBeEqualTo "456"
@@ -64,12 +54,29 @@ class TransactionsServiceTest {
     }
 
     @Test
-    fun `getTransactions throws accountNotFoundException when account does not exist, does not call transactionRepository`() {
+    fun `getTransactions() throws accountNotFoundException when account does not exist, does not call transactionRepository`() {
         every { mockAccountRepository.findByAccountId(any()) } returns null
 
-        invoking { transactionsService.getTransactions(123L) } shouldThrow AccountNotFoundException::class
+        invoking { transactionsService.getTransactions(123L, null) } shouldThrow AccountNotFoundException::class
 
         verify { mockAccountRepository.findByAccountId(123L) }
         verify(exactly = 0) { mockTransactionRepository.findAllByAccount_AccountId(any()) }
+    }
+
+    @Test
+    fun `getTransactions() filters transactions by date when fromDate parameter passed`() {
+        every { mockAccountRepository.findByAccountId(any()) } returns Account(memberName = "Tony Soprano")
+        every { mockTransactionRepository.findAllByAccount_AccountId(any()) } returns listOf(
+            transaction1,
+            transaction2,
+            transaction3
+        )
+
+        val transactionResponseList = transactionsService.getTransactions(456, "2022-02-02")
+
+        transactionResponseList.size shouldBeEqualTo 2
+        transactionResponseList[0].accountId shouldBeEqualTo "456"
+        transactionResponseList[0].date shouldBeEqualTo "2022-02-02"
+        transactionResponseList[1].date shouldBeEqualTo "2022-02-03"
     }
 }

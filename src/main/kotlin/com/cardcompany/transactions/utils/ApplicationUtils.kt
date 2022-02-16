@@ -7,3 +7,7 @@ fun Long.formatAsString(pattern: String): String {
     val dateTimeFormatter = DateTimeFormatter.ofPattern(pattern)
     return dateTimeFormatter.format(LocalDate.ofEpochDay(this))
 }
+
+fun String.convertToEpochDay(): Long {
+  return LocalDate.parse(this).toEpochDay()
+}

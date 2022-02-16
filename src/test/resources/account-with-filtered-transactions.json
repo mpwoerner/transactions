@@ -1,0 +1,18 @@
+[
+  {
+    "transactionId": "3",
+    "date": "2022-02-02",
+    "amount": 50.00,
+    "merchantName": "Etsy",
+    "summary": "How to TDD",
+    "accountId": "789"
+  },
+  {
+    "transactionId": "4",
+    "date": "2022-02-03",
+    "amount": 50.00,
+    "merchantName": "Walmart",
+    "summary": "XP Poster",
+    "accountId": "789"
+  }
+]

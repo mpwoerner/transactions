@@ -14,12 +14,10 @@ class TransactionsControllerAdvice {
     @ExceptionHandler(value = [AccountNotFoundException::class])
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleAccountNotFoundException(ex: Exception): ErrorResponse {
-        val type = ex.javaClass.simpleName
-        val message = ex.message ?: "Account with given ID could not be found"
         return ErrorResponse(
             error = Error(
-                type = type,
-                message = message
+                type = ex.javaClass.simpleName,
+                message = ex.message ?: "Account with given ID could not be found"
             )
         )
     }
